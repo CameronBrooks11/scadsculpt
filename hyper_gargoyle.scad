@@ -75,13 +75,10 @@ function transform(p, m) =
 // TUBE POLYHEDRON FROM A PATH
 // ---------------------------------------------------------
 
-module render_tube_from_path(path_points, radii_list, sides) {
-
-  count = len(path_points);
-  ang_step = 360 / sides;
-
-  // ---- vertices along the path ----
-  vertices = [
+// ---- vertices along the path ----
+function tube_vertices(path_points, radii_list, sides) =
+  let (count = len(path_points), ang_step = 360 / sides)
+  [
     for (i = [0:count - 1]) let (
       pos = path_points[i],
       pos_next = i < count - 1 ? path_points[i + 1]
@@ -94,6 +91,11 @@ module render_tube_from_path(path_points, radii_list, sides) {
       local = [r * cos(theta), r * sin(theta), 0]
     ) pos + transform(local, mat),
   ];
+
+module render_tube_from_path(path_points, radii_list, sides) {
+
+  count = len(path_points);
+  vertices = tube_vertices(path_points, radii_list, sides);
 
   // ---- side faces (quads between rings) ----
   faces_sides = [
@@ -133,9 +135,10 @@ module render_tube_from_path(path_points, radii_list, sides) {
     ) [idx_center, idx_curr, idx_next],
   ];
 
+  // The faces above wind inward; reversed, they face out.
   polyhedron(
     points=vertices_capped,
-    faces=concat(faces_sides, faces_caps),
+    faces=[for (f = concat(faces_sides, faces_caps)) [for (k = [len(f) - 1:-1:0]) f[k]]],
     convexity=10
   );
 }
@@ -208,15 +211,23 @@ module generate_hyper_gargoyle() {
   p3_points = [for (d = p3_data) d[0]];
   p3_radii = [for (d = p3_data) d[1]];
 
+  // ---- lift onto the bed: the lowest vertex of the three tubes on z = 0 ----
+  z_min = min([
+    for (tube = [[p1_points, p1_radii], [p2_points, p2_radii], [p3_points, p3_radii]])
+      min([for (v = tube_vertices(tube[0], tube[1], tube_sides)) v[2]]),
+  ]);
+
   // ---- render: spine + two ribs ----
-  color("crimson")
-    render_tube_from_path(p1_points, p1_radii, tube_sides);
+  translate([0, 0, -z_min]) {
+    color("crimson")
+      render_tube_from_path(p1_points, p1_radii, tube_sides);
 
-  color("chartreuse")
-    render_tube_from_path(p2_points, p2_radii, tube_sides);
+    color("chartreuse")
+      render_tube_from_path(p2_points, p2_radii, tube_sides);
 
-  color("gold")
-    render_tube_from_path(p3_points, p3_radii, tube_sides);
+    color("gold")
+      render_tube_from_path(p3_points, p3_radii, tube_sides);
+  }
 }
 
 // ---------------------------------------------------------

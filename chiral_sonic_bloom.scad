@@ -115,7 +115,10 @@ module sonic_bloom_polyhedron(
     ) [i0, i1, i2, i3],
   ];
 
-  polyhedron(points=points, faces=faces, convexity=10);
+  // Lift it onto the bed: its lowest vertex on z = 0.
+  // The faces above wind inward; reversed, they face out.
+  translate([0, 0, -min([for (p = points) p[2]])])
+    polyhedron(points=points, faces=[for (f = faces) [for (k = [len(f) - 1:-1:0]) f[k]]], convexity=10);
 }
 
 // ---------------------------------------------------------
