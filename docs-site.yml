@@ -1,0 +1,3 @@
+title: scadsculpt
+description: Generative sculptures in OpenSCAD, from closed-form curves swept into tubes and twisted surfaces
+models: chiral_sonic_bloom.scad, crystal_helix_knot.scad, hyper_gargoyle.scad, flame_plumes.scad
