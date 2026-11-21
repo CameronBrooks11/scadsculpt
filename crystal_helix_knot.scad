@@ -22,9 +22,6 @@ pulse_frequency = 8; // [1:1:20] Radius pulsation frequency
 // For a perfect seam, this should be a multiple of 360
 axial_twist_degrees = 360; // [0:1:1080]
 
-/* [View] */
-show_control_points = false;
-
 // ---------------------------------------------------------
 // MATH FUNCTIONS
 // ---------------------------------------------------------
